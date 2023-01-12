@@ -1,0 +1,32 @@
+---
+name: "pre-release"
+
+on:
+  push:
+    branches:
+      - "comment"
+
+jobs:
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Setup Python"
+        uses: actions/setup-python@v3
+      - name: "Install dependencies"
+        run: |
+          python -m pip install poetry
+          poetry install
+      - name: "SemVer"
+        run: python deploy/vbump.py
+      - name: "Build"
+        run: poetry build
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            dist/*
