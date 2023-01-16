@@ -1,0 +1,43 @@
+---
+name: "pre-release"
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Cache dependencies"
+        uses: actions/cache@v3
+        with:
+          key: ${{runner.os}}-python
+          path: ~/.virt
+      - name: "Setup Python"
+        uses: actions/setup-python@v3
+      - name: "Install dependencies"
+        run: |
+          python -m pip install -U pip setuptools poetry
+          poetry config virtualenvs.create false
+          python -m venv ~/.virt
+          . ~/.virt/bin/activate
+          poetry install
+      - name: "Bump Version, Build"
+        run: |
+          . ~/.virt/bin/activate
+          poetry install
+          python deploy/vbump.py
+          poetry build
+          mv dist/schemainspect-3.1.*.tar.gz dist/schemainspect-3.1.latest.tar.gz
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            dist/schemainspect-3.1.latest.tar.gz
