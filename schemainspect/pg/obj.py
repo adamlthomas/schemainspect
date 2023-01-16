@@ -1000,14 +1000,18 @@ class InspectedComment(Inspected):
         # the identifier of domain constraint returned by pg_identify_object has no
         # domain keyword, so we have to add it manually so that we can use the correct
         # identifier in the create statement
-        self.identifier = (
-            identifier
-            if object_type != "domain constraint"
-            else self.domain_constraint_identifier(identifier)
-        )
-        self.object_type = (
-            object_type if object_type.endswith("constraint") is False else "constraint"
-        )
+        if self.is_domain_constraint_identifier_bug_present(identifier):
+            self.identifier = (
+                identifier
+                if object_type != "domain constraint"
+                else self.domain_constraint_identifier(identifier)
+            )
+            self.object_type = (
+                object_type if object_type.endswith("constraint") is False else "constraint"
+            )
+        else:
+            self.identifier = identifier
+            self.object_type = object_type
         self.comment = comment
 
     @property
@@ -1023,6 +1027,11 @@ class InspectedComment(Inspected):
     @property
     def key(self):
         return "{} {}".format(self.object_type, self.identifier)
+
+    # Detects if the bug mentioned above is present
+    def is_domain_constraint_identifier_bug_present(self, identifier):
+        return " domain " not in identifier.lower()
+
 
     def domain_constraint_identifier(self, identifier):
         before_on, after_on = identifier.split(" on ")
