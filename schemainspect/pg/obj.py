@@ -1030,7 +1030,7 @@ class InspectedComment(Inspected):
 
     # Detects if the bug mentioned above is present
     def is_domain_constraint_identifier_bug_present(self, identifier):
-        return " domain " not in identifier.lower()
+        return " on domain " not in identifier.lower()
 
 
     def domain_constraint_identifier(self, identifier):
