@@ -1007,7 +1007,9 @@ class InspectedComment(Inspected):
                 else self.domain_constraint_identifier(identifier)
             )
             self.object_type = (
-                object_type if object_type.endswith("constraint") is False else "constraint"
+                object_type
+                if object_type.endswith("constraint") is False
+                else "constraint"
             )
         else:
             self.identifier = identifier
@@ -1031,7 +1033,6 @@ class InspectedComment(Inspected):
     # Detects if the bug mentioned above is present
     def is_domain_constraint_identifier_bug_present(self, identifier):
         return " on domain " not in identifier.lower()
-
 
     def domain_constraint_identifier(self, identifier):
         before_on, after_on = identifier.split(" on ")
